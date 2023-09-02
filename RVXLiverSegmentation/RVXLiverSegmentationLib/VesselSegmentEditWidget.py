@@ -159,7 +159,7 @@ class VesselSegmentEditWidget(SegmentWidget):
 
 class PortalVesselEditWidget(VesselSegmentEditWidget):
   def __init__(self, logic, treeWizard):
-    super(PortalVesselEditWidget, self).__init__(logic, treeWizard, "Portal Vessels")
+    super(PortalVesselEditWidget, self).__init__(logic, treeWizard, "Arteries")
 
 
 class IVCVesselEditWidget(VesselSegmentEditWidget):

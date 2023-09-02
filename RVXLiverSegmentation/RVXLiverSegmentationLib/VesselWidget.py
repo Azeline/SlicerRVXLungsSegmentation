@@ -683,7 +683,7 @@ class VesselWidget(VerticalLayoutWidget):
 
 class PortalVesselWidget(VesselWidget):
   def __init__(self, logic):
-    super(PortalVesselWidget, self).__init__(logic, "Portal Vessels", setup_portal_vein_default_branch,
+    super(PortalVesselWidget, self).__init__(logic, "Arteries", setup_portal_vein_default_branch,
                                              VesselHelpWidget(VesselHelpType.Portal))
 
 

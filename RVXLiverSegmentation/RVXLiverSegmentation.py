@@ -79,13 +79,9 @@ class RVXLiverSegmentationWidget(ScriptedLoadableModuleWidget):
     self.logic = None
     self._tabWidget = None
     self._dataTab = None
-    self._liverTab = None
-    self._portalVesselsTab = None
-    self._ivcVesselsTab = None
-    self._portalVesselsEditTab = None
-    self._ivcEditTab = None
+    self._arteriesTab = None
+    self._arteriesEditTab = None
 
-    self._tumorTab = None
     self._tabList = []
     self._obs = slicer.mrmlScene.AddObserver(slicer.mrmlScene.EndCloseEvent, lambda *x: self.reloadModule())
 
@@ -235,19 +231,12 @@ class RVXLiverSegmentationWidget(ScriptedLoadableModuleWidget):
     # Initialize Variables
     self.logic = RVXLiverSegmentationLogic()
     self._dataTab = DataWidget()
-    self._liverTab = SegmentWidget(segmentWidgetName="Liver Tab", segmentNodeName="Liver",
-                                   segmentNames=["Liver In", "Liver Out"])
-    self._portalVesselsTab = PortalVesselWidget(self.logic)
-    self._ivcVesselsTab = IVCVesselWidget(self.logic)
+    self._arteriesTab = PortalVesselWidget(self.logic)
 
-    self._portalVesselsEditTab = PortalVesselEditWidget(self.logic, self._portalVesselsTab.getVesselWizard())
-    self._ivcEditTab = IVCVesselEditWidget(self.logic, self._ivcVesselsTab.getVesselWizard())
-    self._tumorTab = SegmentWidget(segmentWidgetName="Tumor Tab", segmentNodeName="Tumors",
-                                   segmentNames=["Tumor", "Not Tumor"])
+    self._arteriesEditTab = PortalVesselEditWidget(self.logic, self._arteriesTab.getVesselWizard())
 
     # Connect vessels tab to vessels edit tab
-    self._portalVesselsTab.vesselSegmentationChanged.connect(self._portalVesselsEditTab.onVesselSegmentationChanged)
-    self._ivcVesselsTab.vesselSegmentationChanged.connect(self._ivcEditTab.onVesselSegmentationChanged)
+    self._arteriesTab.vesselSegmentationChanged.connect(self._arteriesEditTab.onVesselSegmentationChanged)
 
     # Create tab widget and add it to layout in collapsible layout
     self._tabWidget = qt.QTabWidget()
@@ -256,19 +245,11 @@ class RVXLiverSegmentationWidget(ScriptedLoadableModuleWidget):
 
     # Add widgets to tab widget and connect data tab input change to the liver and vessels tab set input methods
     self._addTab(self._dataTab, "Data")
-    self._addTab(self._liverTab, "Liver")
-    self._addTab(self._portalVesselsTab, "Portal Veins")
-    self._addTab(self._portalVesselsEditTab, "Portal Veins Edit")
-    self._addTab(self._ivcVesselsTab, "IVC Veins")
-    self._addTab(self._ivcEditTab, "IVC Veins Edit")
-    self._addTab(self._tumorTab, "Tumors")
+    self._addTab(self._arteriesTab, "Arteries")
+    self._addTab(self._arteriesEditTab, "Arteries Edit")
     self._dataTab.addInputNodeChangedCallback(lambda *x: self._clearTabs())
-    self._dataTab.addInputNodeChangedCallback(self._liverTab.setInputNode)
-    self._dataTab.addInputNodeChangedCallback(self._portalVesselsTab.setInputNode)
-    self._dataTab.addInputNodeChangedCallback(self._portalVesselsEditTab.setInputNode)
-    self._dataTab.addInputNodeChangedCallback(self._ivcVesselsTab.setInputNode)
-    self._dataTab.addInputNodeChangedCallback(self._ivcEditTab.setInputNode)
-    self._dataTab.addInputNodeChangedCallback(self._tumorTab.setInputNode)
+    self._dataTab.addInputNodeChangedCallback(self._arteriesTab.setInputNode)
+    self._dataTab.addInputNodeChangedCallback(self._arteriesEditTab.setInputNode)
 
     # Setup previous and next buttons for the different tabs
     self._configurePreviousNextTabButtons()
