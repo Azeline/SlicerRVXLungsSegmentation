@@ -681,9 +681,9 @@ class VesselWidget(VerticalLayoutWidget):
     return self._vesselBranchWidget.getVesselWizard()
 
 
-class PortalVesselWidget(VesselWidget):
+class ArteriesWidget(VesselWidget):
   def __init__(self, logic):
-    super(PortalVesselWidget, self).__init__(logic, "Arteries", setup_portal_vein_default_branch,
+    super(ArteriesWidget, self).__init__(logic, "Arteries", setup_portal_vein_default_branch,
                                              VesselHelpWidget(VesselHelpType.Portal))
 
 

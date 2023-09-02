@@ -17,5 +17,5 @@ from .VesselBranchWizard import VesselBranchWizard, PlaceStatus, VeinId, NodeBra
   VesselTreeColumnRole, setup_portal_vein_default_branch, setup_inferior_cava_vein_default_branch
 from .VesselHelpWidget import VesselHelpWidget, VesselHelpType
 from .VesselBranchTree import VesselBranchTree, VesselBranchWidget, MarkupNode, TreeDrawer, INodePlaceWidget
-from .VesselWidget import VesselWidget, VesselAdjacencyMatrixExporter, PortalVesselWidget, IVCVesselWidget
-from .VesselSegmentEditWidget import VesselSegmentEditWidget, PortalVesselEditWidget, IVCVesselEditWidget
+from .VesselWidget import VesselWidget, VesselAdjacencyMatrixExporter, ArteriesWidget, IVCVesselWidget
+from .VesselSegmentEditWidget import VesselSegmentEditWidget, ArteriesEditWidget, IVCVesselEditWidget

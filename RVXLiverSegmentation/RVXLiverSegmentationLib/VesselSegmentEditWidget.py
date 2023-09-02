@@ -157,9 +157,9 @@ class VesselSegmentEditWidget(SegmentWidget):
     return self._segmentNode.GetSegmentation()
 
 
-class PortalVesselEditWidget(VesselSegmentEditWidget):
+class ArteriesEditWidget(VesselSegmentEditWidget):
   def __init__(self, logic, treeWizard):
-    super(PortalVesselEditWidget, self).__init__(logic, treeWizard, "Arteries")
+    super(ArteriesEditWidget, self).__init__(logic, treeWizard, "Arteries")
 
 
 class IVCVesselEditWidget(VesselSegmentEditWidget):

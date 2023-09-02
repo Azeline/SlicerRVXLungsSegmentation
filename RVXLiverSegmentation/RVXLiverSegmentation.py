@@ -6,7 +6,7 @@ import slicer
 from slicer.ScriptedLoadableModule import *
 
 from RVXLiverSegmentationLib import RVXLiverSegmentationLogic, Settings, DataWidget, addInCollapsibleLayout, \
-  SegmentWidget, PortalVesselWidget, IVCVesselWidget, PortalVesselEditWidget, IVCVesselEditWidget, createButton, \
+  SegmentWidget, ArteriesWidget, IVCVesselWidget, ArteriesEditWidget, IVCVesselEditWidget, createButton, \
   resourcesPath
 from RVXLiverSegmentationTest import RVXLiverSegmentationTestCase, VesselBranchTreeTestCase, \
   ExtractVesselStrategyTestCase, VesselBranchWizardTestCase, VesselSegmentEditWidgetTestCase
@@ -231,9 +231,9 @@ class RVXLiverSegmentationWidget(ScriptedLoadableModuleWidget):
     # Initialize Variables
     self.logic = RVXLiverSegmentationLogic()
     self._dataTab = DataWidget()
-    self._arteriesTab = PortalVesselWidget(self.logic)
+    self._arteriesTab = ArteriesWidget(self.logic)
 
-    self._arteriesEditTab = PortalVesselEditWidget(self.logic, self._arteriesTab.getVesselWizard())
+    self._arteriesEditTab = ArteriesEditWidget(self.logic, self._arteriesTab.getVesselWizard())
 
     # Connect vessels tab to vessels edit tab
     self._arteriesTab.vesselSegmentationChanged.connect(self._arteriesEditTab.onVesselSegmentationChanged)
@@ -250,9 +250,6 @@ class RVXLiverSegmentationWidget(ScriptedLoadableModuleWidget):
     self._dataTab.addInputNodeChangedCallback(lambda *x: self._clearTabs())
     self._dataTab.addInputNodeChangedCallback(self._arteriesTab.setInputNode)
     self._dataTab.addInputNodeChangedCallback(self._arteriesEditTab.setInputNode)
-
-    # Setup previous and next buttons for the different tabs
-    self._configurePreviousNextTabButtons()
 
   def _clearTabs(self):
     """
@@ -306,15 +303,6 @@ class RVXLiverSegmentationWidget(ScriptedLoadableModuleWidget):
     self._tabWidget.widget(index).resize(self._tabWidget.widget(index).minimumSizeHint)
     self._tabWidget.widget(index).adjustSize()
 
-  def _configurePreviousNextTabButtons(self):
-    """Adds previous and next buttons to tabs added to layout. If previous tab is not defined, button will be grayed out.
-    If next tab is not defined, next button will be replaced by export button.
-    """
-    for i, tab in enumerate(self._tabList):
-      prev_tab = self._tabList[i - 1] if i - 1 >= 0 else None
-      next_tab = self._tabList[i + 1] if i + 1 < len(self._tabList) else None
-      tab.insertLayout(0, self._createPreviousNextArrowsLayout(previous_tab=prev_tab, next_tab=next_tab))
-
   def _setCurrentTab(self, tab_widget):
     # Change tab to new widget
     self._tabWidget.setCurrentWidget(tab_widget)
@@ -356,67 +344,6 @@ class RVXLiverSegmentationWidget(ScriptedLoadableModuleWidget):
 
     # return only not None elements
     return [vol for vol in volumesToExport if vol is not None]
-
-  def _createTabButton(self, buttonIcon, nextTab=None):
-    """Creates a button linking to a given input tab. If input tab is None, button will be disabled
-
-    Parameters
-    ----------
-    buttonIcon
-      Icon for the button
-    nextTab
-      Next tab which will be set when button is clicked
-
-    Returns
-    -------
-      QPushButton
-    """
-    tabButton = qt.QPushButton()
-    tabButton.setIcon(buttonIcon)
-    if nextTab is not None:
-      tabButton.connect('clicked()', lambda tab=nextTab: self._setCurrentTab(tab))
-      tabButton.setText(nextTab.name)
-    else:
-      tabButton.enabled = False
-    return tabButton
-
-  def _createPreviousNextArrowsLayout(self, previous_tab=None, next_tab=None):
-    """Creates HBox layout with previous and next arrows pointing to previous Tab and Next tab given as input.
-
-    If input tabs are None, button will be present but disabled.
-
-    Parameters
-    ----------
-    previous_tab
-      Tab set when clicking on left arrow
-    next_tab
-      Tab set when clicking on right arrow
-
-    Returns
-    -------
-    QHBoxLayout
-      Layout with previous and next arrows pointing to input tabs
-    """
-    # Create previous / next arrows
-    previousIcon = qt.QApplication.style().standardIcon(qt.QStyle.SP_ArrowLeft)
-    previousButton = self._createTabButton(previousIcon, previous_tab)
-
-    # Create Next button if next tab is set.
-    if next_tab:
-      nextIcon = qt.QApplication.style().standardIcon(qt.QStyle.SP_ArrowRight)
-      nextButton = self._createTabButton(nextIcon, next_tab)
-    else:  # Else set next button as export button
-      nextIcon = qt.QApplication.style().standardIcon(qt.QStyle.SP_DialogSaveButton)
-      nextButton = qt.QPushButton("Export all segmented volumes")
-      nextButton.connect('clicked(bool)', self._exportVolumes)
-      nextButton.setIcon(nextIcon)
-
-    # Add arrows to Horizontal layout and return layout
-    buttonHBoxLayout = qt.QHBoxLayout()
-    buttonHBoxLayout.addWidget(previousButton)
-    buttonHBoxLayout.addWidget(nextButton)
-    return buttonHBoxLayout
-
 
 class RVXLiverSegmentationTest(ScriptedLoadableModuleTest):
   def runTest(self):
