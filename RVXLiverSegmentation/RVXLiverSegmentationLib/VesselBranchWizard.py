@@ -91,7 +91,7 @@ def setup_portal_vein_default_branch(tree):
                 (VeinId.MedialRML, VeinId.MiddleLobarArteryRML),
                 (VeinId.LateralRML, VeinId.MiddleLobarArteryRML),
 
-                (VeinId.InferiorLobarArteryRLL, VeinId.RightPulmonaryArtery),
+                (VeinId.InferiorLobarArteryRLL, VeinId.MiddleLobarArteryRML),
                 (VeinId.SuperiorRLL, VeinId.InferiorLobarArteryRLL),
                 (VeinId.AnteriorRLL, VeinId.InferiorLobarArteryRLL),
                 (VeinId.LateralRLL, VeinId.InferiorLobarArteryRLL),
