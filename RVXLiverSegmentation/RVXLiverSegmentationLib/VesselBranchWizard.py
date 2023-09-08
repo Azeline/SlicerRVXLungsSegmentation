@@ -4,36 +4,36 @@ from RVXLiverSegmentationLib import Signal, jumpSlicesToNthMarkupPosition
 
 
 class VeinId(object):
-    BaseTroncPulmonaire = "Base Tronc Pulmonaire"
-    TroncPulmonaire = "Tronc Pulmonaire"
-    ArterePulmonaireDroite = "Artère Pulmonaire Droite"
-    ArtereLobaireSuperieurePD = "Artère Lobaire Supérieure PD"
-    ArtereSegmentereApicaleA1PD = "Artère Segmentère Apicale A1 PD"
-    ArtereSegmentaireAnterieureA2PD = "Artère Segmentaire Antérieure A2 PD"
-    ArtereSegmentairePosterieureA3PD = "Artère Segmentaire Postérieure A3 PD"
-    ArtereLobaireMoyennePD = "Artère Lobaire Moyenne PD"
-    ArteresegmentairemedialeA4PD = "Artère segmentaire médiale A4 PD"
-    ArtereSegmentaireLateraleA5PD = "Artère Segmentaire Latérale A5 PD"
-    ArtereLobaireInferieurePD = "Artère Lobaire Inférieure PD"
-    ArtereSegmentaireSuperieureA6PD = "Artère Segmentaire Supérieure A6 PD"
-    ArtereSegmentairebasaleAnterieureA7PD = "Artère Segmentaire basale Antérieure A7 PD"
-    ArtereSegmentairebasaleLateraleA8PD = "Artère Segmentaire basale Latérale A8 PD"
-    ArtereSegmentairebasaleMedialeA9PD = "Artère Segmentaire basale Médiale A9 PD"
-    ArtereSegmentairebasalePosterieureA10PD = "Artère Segmentaire basale Postérieure A10 PD"
-    ArterePulmonaireGauche = "Artère Pulmonaire Gauche"
-    ArtereLobaireSuperieurePG = "Artère Lobaire Supérieure PG"
-    ArtereSegmentaireApicaleA1PG = "Artère Segmentaire Apicale A1 PG"
-    ArtereSegmentaireAnterieureA2PG = "Artère Segmentaire Antérieure A2 PG"
-    ArtereSegmentairePosterieureA3PG = "Artère Segmentaire Postérieure A3 PG"
-    ArtereLingulairePG = "Artère Lingulaire PG"
-    ArtereLingulaireInferieureA4PG = "Artère Lingulaire Inférieure A4 PG"
-    ArtereLingulaireSuperieureA5PG = "Artère Lingulaire Supérieure A5 PG"
-    ArtereLobaireInferieurePG = "Artère Lobaire Inférieure PG"
-    ArtereSegmentaireSuperieureA6PG = "Artère Segmentaire Supérieure A6 PG"
-    ArtereSegmentairebasaleAnterieureA7PG = "Artère Segmentaire basale Antérieure A7 PG"
-    ArtereSegmentairebasaleLateraleA8PG = "Artère Segmentaire basale Latérale A8 PG"
-    ArtereSegmentairebasaleMedialeA9PG = "Artère Segmentaire basale Médiale A9 PG"
-    ArtereSegmentairebasalePosterieureA10PG = "Artère Segmentaire basale Postérieure A10 PG"
+    PulmonaryTrunkRoot = "Pulmonary Trunk Root"
+    PulmonaryTrunk = "Pulmonary Trunk"
+    RightPulmonaryArtery = "Right Pulmonary Artery"
+    SuperiorLobarArteryRUL = "Superior Lobar Artery RUL"
+    ApicalRUL = "Apical RUL"
+    AnteriorRUL = "Anterior RUL"
+    PosteriorRUL = "Posterior RUL"
+    MiddleLobarArteryRML = "Middle Lobar Artery RML"
+    MedialRML = "Medial RML"
+    LateralRML = "Lateral RML"
+    InferiorLobarArteryRLL = "Inferior Lobar Artery RLL"
+    SuperiorRLL = "Superior RLL"
+    AnteriorRLL = "Anterior RLL"
+    LateralRLL = "Lateral RLL"
+    MedialRLL = "Medial RLL"
+    PosteriorRLL = "Posterior RLL"
+    LeftPulmonaryArtery = "Left Pulmonary Artery"
+    SuperiorLobarArteryLUL = "Superior Lobar Artery LUL"
+    ApicalLUL = "Apical LUL"
+    AnteriorLUL = "Anterior LUL"
+    PosteriorLUL = "Posterior LUL"
+    LingularArteryLML = "Lingular Artery LML"
+    InferiorLingulaLML = "Inferior Lingula LML"
+    SuperiorLingulaLML = "Superior Lingula LML"
+    InferiorLobarArteryLLL = "Inferior Lobar Artery LLL"
+    SuperiorLLL = "Superior LLL"
+    AnteriorLLL = "Anterior LLL"
+    LateralLLL = "Lateral LLL"
+    MedialLLL = "Medial LLL"
+    PosteriorLLL = "Posterior LLL"
 
     def sortedIds(self):
         return [v for k, v in VeinId.__dict__.items() if not k.startswith("__")]
@@ -77,44 +77,44 @@ class InteractionStatus(object):
 
 
 def setup_portal_vein_default_branch(tree):
-    branches = [(VeinId.BaseTroncPulmonaire, None),
-                (VeinId.TroncPulmonaire, VeinId.BaseTroncPulmonaire),
+    branches = [(VeinId.PulmonaryTrunkRoot, None),
+                (VeinId.PulmonaryTrunk, VeinId.PulmonaryTrunkRoot),
                 # Right lung
-                (VeinId.ArterePulmonaireDroite, VeinId.TroncPulmonaire),
+                (VeinId.RightPulmonaryArtery, VeinId.PulmonaryTrunk),
 
-                (VeinId.ArtereLobaireSuperieurePD, VeinId.ArterePulmonaireDroite),
-                (VeinId.ArtereSegmentereApicaleA1PD, VeinId.ArtereLobaireSuperieurePD),
-                (VeinId.ArtereSegmentaireAnterieureA2PD, VeinId.ArtereLobaireSuperieurePD),
-                (VeinId.ArtereSegmentairePosterieureA3PD, VeinId.ArtereLobaireSuperieurePD),
+                (VeinId.SuperiorLobarArteryRUL, VeinId.RightPulmonaryArtery),
+                (VeinId.ApicalRUL, VeinId.SuperiorLobarArteryRUL),
+                (VeinId.AnteriorRUL, VeinId.SuperiorLobarArteryRUL),
+                (VeinId.PosteriorRUL, VeinId.SuperiorLobarArteryRUL),
 
-                (VeinId.ArtereLobaireMoyennePD, VeinId.ArtereLobaireSuperieurePD),
-                (VeinId.ArteresegmentairemedialeA4PD, VeinId.ArtereLobaireMoyennePD),
-                (VeinId.ArtereSegmentaireLateraleA5PD, VeinId.ArtereLobaireMoyennePD),
+                (VeinId.MiddleLobarArteryRML, VeinId.RightPulmonaryArtery),
+                (VeinId.MedialRML, VeinId.MiddleLobarArteryRML),
+                (VeinId.LateralRML, VeinId.MiddleLobarArteryRML),
 
-                (VeinId.ArtereLobaireInferieurePD, VeinId.ArtereLobaireMoyennePD),
-                (VeinId.ArtereSegmentaireSuperieureA6PD, VeinId.ArtereLobaireInferieurePD),
-                (VeinId.ArtereSegmentairebasaleAnterieureA7PD, VeinId.ArtereLobaireInferieurePD),
-                (VeinId.ArtereSegmentairebasaleLateraleA8PD, VeinId.ArtereLobaireInferieurePD),
-                (VeinId.ArtereSegmentairebasaleMedialeA9PD, VeinId.ArtereLobaireInferieurePD),
-                (VeinId.ArtereSegmentairebasalePosterieureA10PD, VeinId.ArtereLobaireInferieurePD),
+                (VeinId.InferiorLobarArteryRLL, VeinId.RightPulmonaryArtery),
+                (VeinId.SuperiorRLL, VeinId.InferiorLobarArteryRLL),
+                (VeinId.AnteriorRLL, VeinId.InferiorLobarArteryRLL),
+                (VeinId.LateralRLL, VeinId.InferiorLobarArteryRLL),
+                (VeinId.MedialRLL, VeinId.InferiorLobarArteryRLL),
+                (VeinId.PosteriorRLL, VeinId.InferiorLobarArteryRLL),
                 # Left lung
-                (VeinId.ArterePulmonaireGauche, VeinId.TroncPulmonaire),
+                (VeinId.LeftPulmonaryArtery, VeinId.PulmonaryTrunk),
 
-                (VeinId.ArtereLobaireSuperieurePG, VeinId.ArterePulmonaireGauche),
-                (VeinId.ArtereSegmentaireApicaleA1PG, VeinId.ArtereLobaireSuperieurePG),
-                (VeinId.ArtereSegmentaireAnterieureA2PG, VeinId.ArtereLobaireSuperieurePG),
-                (VeinId.ArtereSegmentairePosterieureA3PG, VeinId.ArtereLobaireSuperieurePG),
+                (VeinId.SuperiorLobarArteryLUL, VeinId.LeftPulmonaryArtery),
+                (VeinId.ApicalLUL, VeinId.SuperiorLobarArteryLUL),
+                (VeinId.AnteriorLUL, VeinId.SuperiorLobarArteryLUL),
+                (VeinId.PosteriorLUL, VeinId.SuperiorLobarArteryLUL),
 
-                (VeinId.ArtereLingulairePG, VeinId.ArtereLobaireSuperieurePG),
-                (VeinId.ArtereLingulaireInferieureA4PG, VeinId.ArtereLingulairePG),
-                (VeinId.ArtereLingulaireSuperieureA5PG, VeinId.ArtereLingulairePG),
+                (VeinId.LingularArteryLML, VeinId.LeftPulmonaryArtery),
+                (VeinId.InferiorLingulaLML, VeinId.LingularArteryLML),
+                (VeinId.SuperiorLingulaLML, VeinId.LingularArteryLML),
 
-                (VeinId.ArtereLobaireInferieurePG, VeinId.ArtereLingulairePG),
-                (VeinId.ArtereSegmentaireSuperieureA6PG, VeinId.ArtereLobaireInferieurePG),
-                (VeinId.ArtereSegmentairebasaleAnterieureA7PG, VeinId.ArtereLobaireInferieurePG),
-                (VeinId.ArtereSegmentairebasaleLateraleA8PG, VeinId.ArtereLobaireInferieurePG),
-                (VeinId.ArtereSegmentairebasaleMedialeA9PG, VeinId.ArtereLobaireInferieurePG),
-                (VeinId.ArtereSegmentairebasalePosterieureA10PG, VeinId.ArtereLobaireInferieurePG),
+                (VeinId.InferiorLobarArteryLLL, VeinId.LeftPulmonaryArtery),
+                (VeinId.SuperiorLLL, VeinId.InferiorLobarArteryLLL),
+                (VeinId.AnteriorLLL, VeinId.InferiorLobarArteryLLL),
+                (VeinId.LateralLLL, VeinId.InferiorLobarArteryLLL),
+                (VeinId.MedialLLL, VeinId.InferiorLobarArteryLLL),
+                (VeinId.PosteriorLLL, VeinId.InferiorLobarArteryLLL),
                 ]
 
     for child, parent in branches:
@@ -122,24 +122,24 @@ def setup_portal_vein_default_branch(tree):
 
 
 def setup_inferior_cava_vein_default_branch(tree):
-    branches = [(VeinId.TroncPulmonaire, None),
-                (VeinId.ArterePulmonaireDroite, VeinId.TroncPulmonaire),
+    branches = [(VeinId.PulmonaryTrunk, None),
+                (VeinId.RightPulmonaryArtery, VeinId.PulmonaryTrunk),
 
-                (VeinId.ArtereLobaireSuperieurePD, VeinId.ArterePulmonaireDroite),
-                (VeinId.ArtereSegmentereApicaleA1PD, VeinId.ArtereLobaireSuperieurePD),
-                (VeinId.ArtereSegmentaireAnterieureA2PD, VeinId.ArtereLobaireSuperieurePD),
-                (VeinId.ArtereSegmentairePosterieureA3PD, VeinId.ArtereLobaireSuperieurePD),
+                (VeinId.SuperiorLobarArteryRUL, VeinId.RightPulmonaryArtery),
+                (VeinId.ApicalRUL, VeinId.SuperiorLobarArteryRUL),
+                (VeinId.AnteriorRUL, VeinId.SuperiorLobarArteryRUL),
+                (VeinId.PosteriorRUL, VeinId.SuperiorLobarArteryRUL),
 
-                (VeinId.ArtereLobaireMoyennePD, VeinId.ArtereLobaireSuperieurePD),
-                (VeinId.ArteresegmentairemedialeA4PD, VeinId.ArtereLobaireMoyennePD),
-                (VeinId.ArtereSegmentaireLateraleA5PD, VeinId.ArtereLobaireMoyennePD),
+                (VeinId.MiddleLobarArteryRML, VeinId.SuperiorLobarArteryRUL),
+                (VeinId.MedialRML, VeinId.MiddleLobarArteryRML),
+                (VeinId.LateralRML, VeinId.MiddleLobarArteryRML),
 
-                (VeinId.ArtereLobaireInferieurePD, VeinId.ArtereLobaireMoyennePD),
-                (VeinId.ArtereSegmentaireSuperieureA6PD, VeinId.ArtereLobaireInferieurePD),
-                (VeinId.ArtereSegmentairebasaleAnterieureA7PD, VeinId.ArtereLobaireInferieurePD),
-                (VeinId.ArtereSegmentairebasaleLateraleA8PD, VeinId.ArtereLobaireInferieurePD),
-                (VeinId.ArtereSegmentairebasaleMedialeA9PD, VeinId.ArtereLobaireInferieurePD),
-                (VeinId.ArtereSegmentairebasalePosterieureA10PD, VeinId.ArtereLobaireInferieurePD),
+                (VeinId.InferiorLobarArteryRLL, VeinId.MiddleLobarArteryRML),
+                (VeinId.SuperiorRLL, VeinId.InferiorLobarArteryRLL),
+                (VeinId.AnteriorRLL, VeinId.InferiorLobarArteryRLL),
+                (VeinId.LateralRLL, VeinId.InferiorLobarArteryRLL),
+                (VeinId.MedialRLL, VeinId.InferiorLobarArteryRLL),
+                (VeinId.PosteriorRLL, VeinId.InferiorLobarArteryRLL),
                 ]
 
     for child, parent in branches:
