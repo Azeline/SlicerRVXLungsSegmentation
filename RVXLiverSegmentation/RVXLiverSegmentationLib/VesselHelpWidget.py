@@ -24,7 +24,7 @@ class VesselHelpWidget:
         QToolTip.showText(QCursor.pos(), self.tooltipImageUrl(self._lastVeinType))
 
     def tooltipImageUrl(self, veinType):
-        return f"<img src='{self.getHelpImagePath(veinType)}' width='600' height='600'>"
+        return f"<img src='{self.getHelpImagePath(veinType)}' width='750' height='600'>"
 
     def getHelpImagePath(self, veinType):
         return self._helpDict.get(veinType, self._default)
