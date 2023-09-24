@@ -288,7 +288,6 @@ class VesselBranchWizard(object):
         self._treeDrawer.updateTreeLines()
 
     def onItemRenamed(self, previous, new):
-        print(f"from wizard :\nprevious : {previous} new : {new}")
         nodeList = self._node.GetNodeLabelList()
         try:
             idx = nodeList.index(previous)

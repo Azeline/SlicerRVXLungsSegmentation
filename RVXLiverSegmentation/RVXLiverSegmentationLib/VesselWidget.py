@@ -510,7 +510,6 @@ class VesselWidget(VerticalLayoutWidget):
       progressDialog.repaint()
       self._updateVesselnessVolume()
       strategy = self._strategies[self._strategyChoice.currentText]
-      print(f"Strategy choice : {self._strategyChoice.currentText}")
       progressDialog.setLabelText(progressText + "\n\nSegmenting Vessels...")
       progressDialog.repaint()
       self._vesselVolumeNode, self._vesselModelNode = strategy.extractVesselVolumeFromVesselBranchTree(branchTree,

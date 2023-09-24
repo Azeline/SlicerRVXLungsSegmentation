@@ -181,6 +181,12 @@ class VesselBranchTree(qt.QTreeWidget):
       self.editing_node = False
       previous = item.nodeId
       new = item.text(0)
+
+      # Forbid renaming with existing name
+      if self.isInTree(new):
+        item.updateText()
+        return
+
       self._branchDict[item.text(0)] = self._branchDict.pop(item.nodeId)
       item.nodeId = item.text(0)
       item.updateText()
@@ -209,7 +215,11 @@ class VesselBranchTree(qt.QTreeWidget):
       return VesselBranchTreeItem(nodeId)
 
   def _addNode(self):
-    new_node = "n"+str(len(self._branchDict))
+    new_node_idx = len(self._branchDict)
+    new_node = f"n{new_node_idx}"
+    while self.isInTree(new_node):
+      new_node_idx += 1
+      new_node = f"n{new_node_idx}"
     parent_node = None
     if len(self._branchDict) == 1:
       parent_node = list(self.getNodeList())[0]
