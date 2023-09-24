@@ -208,6 +208,15 @@ class VesselBranchTree(qt.QTreeWidget):
     else:
       return VesselBranchTreeItem(nodeId)
 
+  def _addNode(self):
+    new_node = "n"+str(len(self._branchDict))
+    parent_node = None
+    if len(self._branchDict) == 1:
+      parent_node = list(self.getNodeList())[0]
+    elif len(self._branchDict) > 1:
+      parent_node = self.getTreeParentList()[-1][0]
+    self._insertNode(new_node, parent_node, PlaceStatus.NOT_PLACED)
+
   def _removeFromParent(self, nodeItem):
     """Remove input node item from its parent if it is attached to an item or from the TreeWidget if at the root
     """
@@ -901,6 +910,10 @@ class VesselBranchWidget(qt.QWidget):
     # Create vertical layout and add Add and edit buttons on top of extract button
     buttonLayout = qt.QVBoxLayout()
     buttonLayout.addLayout(addEditButtonLayout)
+    self._clearTreeButton = createButton("Clear Tree", lambda : (self._branchTree.clear(), self._treeDrawer.clear(), self._markupNode.RemoveAllControlPoints()))
+    buttonLayout.addWidget(self._clearTreeButton)
+    self._addNodeButton = createButton("Add Node", self._branchTree._addNode)
+    buttonLayout.addWidget(self._addNodeButton)
     self.extractVesselsButton = createButton("Extract Vessels from node tree")
     buttonLayout.addWidget(self.extractVesselsButton)
     return buttonLayout
