@@ -16,6 +16,7 @@ class VesselBranchTreeItem(qt.QTreeWidgetItem):
     self.nodeId = nodeId
     self.setIcon(VesselTreeColumnRole.DELETE, Icons.delete)
     self._status = status
+    self.setFlags(self.flags() | qt.Qt.ItemIsEditable)
     self.updateText()
 
   @property
@@ -35,7 +36,6 @@ class VesselBranchTreeItem(qt.QTreeWidgetItem):
     self.setText(0, "{} {}".format(self.nodeId, suffix) if suffix is not None else self.nodeId)
     self.setText(VesselTreeColumnRole.INSERT_BEFORE, "Insert Before")
 
-
 class VesselBranchTree(qt.QTreeWidget):
   """Tree representation of vessel branch nodes.
 
@@ -47,6 +47,13 @@ class VesselBranchTree(qt.QTreeWidget):
     qt.QTreeWidget.__init__(self, parent)
 
     self.keyPressed = Signal("VesselBranchTreeItem, qt.Qt.Key")
+    self.setContextMenuPolicy(qt.Qt.CustomContextMenu)
+    self.customContextMenuRequested.connect(self.onContextMenu)
+    self.editing_node = False
+    self.itemChanged.connect(self.onItemChange)
+    self.itemRenamed = Signal(str, str)
+    self.itemDroped = Signal()
+
     self.insertBeforeClicked = Signal("VesselBranchTreeItem")
 
     self._branchDict = {}
@@ -68,6 +75,10 @@ class VesselBranchTree(qt.QTreeWidget):
     self.setDragEnabled(True)
     self.setDropIndicatorShown(True)
     self.setDragDropMode(qt.QAbstractItemView.InternalMove)
+
+  def mouseDoubleClickEvent(self, event):
+    # Prevent the default double-click editing behavior
+    event.ignore()
 
   def clear(self):
     self._branchDict = {}
@@ -126,6 +137,7 @@ class VesselBranchTree(qt.QTreeWidget):
     """
     qt.QTreeWidget.dropEvent(self, event)
     self.enforceOneRoot()
+    self.itemDroped.emit()
 
   def keyPressEvent(self, event):
     """Overridden from qt.QTreeWidget to notify listeners of key event
@@ -138,6 +150,51 @@ class VesselBranchTree(qt.QTreeWidget):
       self.keyPressed.emit(self.currentItem(), event.key())
 
     qt.QTreeWidget.keyPressEvent(self, event)
+
+  def onContextMenu(self, position):
+    # Cannot display context menu while editing
+    if PlaceStatus.PLACING in [node.status for node in self._branchDict.values()]:
+      return
+
+    displayAction = qt.QAction("Display Selection")
+    displayAction.triggered.connect(self.displaySelection)
+
+    renameAction = qt.QAction("Rename")
+    renameAction.triggered.connect(self.renameItem)
+
+    deleteAction = qt.QAction("Delete")
+    deleteAction.triggered.connect(self.displaySelection)
+
+    addChildAction = qt.QAction("Add child")
+    addChildAction.triggered.connect(self.displaySelection)
+
+    menu = qt.QMenu(self)
+    menu.addAction(displayAction)
+    menu.addAction(renameAction)
+    menu.addAction(deleteAction)
+    menu.addAction(addChildAction)
+
+    menu.exec_(self.mapToGlobal(position))
+
+  def onItemChange(self, item, column):
+    if self.editing_node:
+      self.editing_node = False
+      previous = item.nodeId
+      new = item.text(0)
+      self._branchDict[item.text(0)] = self._branchDict.pop(item.nodeId)
+      item.nodeId = item.text(0)
+      item.updateText()
+      self.itemRenamed.emit(previous, new)
+
+  def displaySelection(self):
+    column = self.currentColumn()
+    text = self.currentItem().text(0)
+    print(f"right-clicked item is {text}")
+
+  def renameItem(self):
+    item: VesselBranchTreeItem = self.currentItem()
+    self.editing_node = True
+    self.editItem(item, 0)
 
   def _takeItem(self, nodeId):
     """Remove item with given item id from the tree. Removes it from its parent if necessary
@@ -681,6 +738,9 @@ class MarkupNode(object):
   def GetLastFiducialId(self):
     return max(0, self.GetNumberOfControlPoints() - 1)
 
+  def GetNodeLabelList(self):
+    return [self.GetNthControlPointLabel(i) for i in range(self.GetNumberOfControlPoints())]
+
   def __del__(self):
     for obsId in self._nodeObsId:
       self._node.RemoveObserver(obsId)
@@ -699,6 +759,7 @@ class MarkupNode(object):
 
   def _emitPointModified(self, caller, callData):
     self.pointModified.emit(callData)
+
 
 
 class INodePlaceWidget(object):
@@ -746,7 +807,6 @@ class SlicerNodePlaceWidget(INodePlaceWidget):
   @property
   def placeModeEnabled(self):
     return self._placeWidget.placeModeEnabled
-
 
 class VesselBranchWidget(qt.QWidget):
   """Class holding the widgets for vessel branch node edition.

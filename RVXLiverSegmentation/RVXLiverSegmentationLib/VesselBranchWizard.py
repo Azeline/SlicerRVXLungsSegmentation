@@ -175,7 +175,9 @@ class VesselBranchWizard(object):
         self._tree.connect("itemClicked(QTreeWidgetItem *, int)", self.onItemClicked)
         self._tree.connect("currentItemChanged(QTreeWidgetItem *), QTreeWidgetItem *)",
                            lambda current, previous: self.onItemClicked(current, 0))
+        self._tree.itemRenamed.connect(self.onItemRenamed)
         self._tree.keyPressed.connect(self.onKeyPressed)
+        self._tree.itemDroped.connect(lambda *x: self._treeDrawer.updateTreeLines())
         self._node.pointAdded.connect(self.onMarkupPointAdded)
         self._node.pointModified.connect(lambda *x: self._treeDrawer.updateTreeLines())
         self._node.pointInteractionEnded.connect(lambda *x: self._treeDrawer.updateTreeLines())
@@ -273,6 +275,7 @@ class VesselBranchWizard(object):
 
         self._currentTreeItem = treeItem
         if column == VesselTreeColumnRole.DELETE:
+            print(f"Deleting {treeItem}")
             self._onDeleteItem(treeItem)
         elif column == VesselTreeColumnRole.INSERT_BEFORE:
             self.onInsertBeforeNode()
@@ -283,6 +286,16 @@ class VesselBranchWizard(object):
 
         self._jumpSlicesToCurrentNode()
         self._treeDrawer.updateTreeLines()
+
+    def onItemRenamed(self, previous, new):
+        print(f"from wizard :\nprevious : {previous} new : {new}")
+        nodeList = self._node.GetNodeLabelList()
+        try:
+            idx = nodeList.index(previous)
+            self._node.SetNthControlPointLabel(idx, new)
+            self._treeDrawer.updateTreeLines()
+        except ValueError:
+            pass
 
     def _jumpSlicesToCurrentNode(self):
         """
