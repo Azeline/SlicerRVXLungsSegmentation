@@ -176,8 +176,9 @@ class VesselBranchWizard(object):
         self._tree.connect("currentItemChanged(QTreeWidgetItem *), QTreeWidgetItem *)",
                            lambda current, previous: self.onItemClicked(current, 0))
         self._tree.itemRenamed.connect(self.onItemRenamed)
+        self._tree.itemDeleted.connect(self._onDeleteItem)
         self._tree.keyPressed.connect(self.onKeyPressed)
-        self._tree.itemDroped.connect(lambda *x: self._treeDrawer.updateTreeLines())
+        self._tree.itemDropped.connect(lambda: self._treeDrawer.updateTreeLines())
         self._node.pointAdded.connect(self.onMarkupPointAdded)
         self._node.pointModified.connect(lambda *x: self._treeDrawer.updateTreeLines())
         self._node.pointInteractionEnded.connect(lambda *x: self._treeDrawer.updateTreeLines())

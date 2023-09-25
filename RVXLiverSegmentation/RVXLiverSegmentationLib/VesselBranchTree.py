@@ -52,7 +52,8 @@ class VesselBranchTree(qt.QTreeWidget):
     self.editing_node = False
     self.itemChanged.connect(self.onItemChange)
     self.itemRenamed = Signal(str, str)
-    self.itemDroped = Signal()
+    self.itemDropped = Signal()
+    self.itemDeleted = Signal("VesselBranchTreeItem")
 
     self.insertBeforeClicked = Signal("VesselBranchTreeItem")
 
@@ -137,7 +138,7 @@ class VesselBranchTree(qt.QTreeWidget):
     """
     qt.QTreeWidget.dropEvent(self, event)
     self.enforceOneRoot()
-    self.itemDroped.emit()
+    self.itemDropped.emit()
 
   def keyPressEvent(self, event):
     """Overridden from qt.QTreeWidget to notify listeners of key event
@@ -163,10 +164,10 @@ class VesselBranchTree(qt.QTreeWidget):
     renameAction.triggered.connect(self.renameItem)
 
     deleteAction = qt.QAction("Delete")
-    deleteAction.triggered.connect(self.displaySelection)
+    deleteAction.triggered.connect(lambda :self.itemDeleted.emit(self.currentItem()))
 
     addChildAction = qt.QAction("Add child")
-    addChildAction.triggered.connect(self.displaySelection)
+    addChildAction.triggered.connect(lambda: self._addNode(parent_node=self.currentItem().nodeId))
 
     menu = qt.QMenu(self)
     menu.addAction(displayAction)
@@ -196,6 +197,7 @@ class VesselBranchTree(qt.QTreeWidget):
     column = self.currentColumn()
     text = self.currentItem().text(0)
     print(f"right-clicked item is {text}")
+    print(f"type : {type(self.currentItem())}")
 
   def renameItem(self):
     item: VesselBranchTreeItem = self.currentItem()
@@ -214,17 +216,17 @@ class VesselBranchTree(qt.QTreeWidget):
     else:
       return VesselBranchTreeItem(nodeId)
 
-  def _addNode(self):
+  def _addNode(self, parent_node=None):
     new_node_idx = len(self._branchDict)
     new_node = f"n{new_node_idx}"
     while self.isInTree(new_node):
       new_node_idx += 1
       new_node = f"n{new_node_idx}"
-    parent_node = None
-    if len(self._branchDict) == 1:
-      parent_node = list(self.getNodeList())[0]
-    elif len(self._branchDict) > 1:
-      parent_node = self.getTreeParentList()[-1][0]
+    if parent_node is None:
+      if len(self._branchDict) == 1:
+        parent_node = list(self.getNodeList())[0]
+      elif len(self._branchDict) > 1:
+        parent_node = self.getTreeParentList()[-1][0]
     self._insertNode(new_node, parent_node, PlaceStatus.NOT_PLACED)
 
   def _removeFromParent(self, nodeItem):
