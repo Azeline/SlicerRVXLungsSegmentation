@@ -752,6 +752,7 @@ class MarkupNode(object):
     self.GetLocked = self._node.GetLocked
     self.GetDisplayNode = self._node.GetDisplayNode
     self.RemoveAllControlPoints = self._node.RemoveAllControlPoints
+    self.RemoveNthControlPoint = self._node.RemoveNthControlPoint
 
   def GetSlicerNode(self):
     return self._node

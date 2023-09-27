@@ -276,7 +276,6 @@ class VesselBranchWizard(object):
 
         self._currentTreeItem = treeItem
         if column == VesselTreeColumnRole.DELETE:
-            print(f"Deleting {treeItem}")
             self._onDeleteItem(treeItem)
         elif column == VesselTreeColumnRole.INSERT_BEFORE:
             self.onInsertBeforeNode()
@@ -339,7 +338,10 @@ class VesselBranchWizard(object):
     Remove the item from the tree and hide the associated markup
     """
         self.onStopInteraction()
-        self._tree.removeNode(treeItem.nodeId)
+        nodeList = self._node.GetNodeLabelList()
+        nodeId = treeItem.nodeId
+        self._tree.removeNode(nodeId)
+        self._node.RemoveNthControlPoint(nodeList.index(nodeId))
         self.updateNodeVisibility()
         if self._currentTreeItem == treeItem:
             self._currentTreeItem = None
