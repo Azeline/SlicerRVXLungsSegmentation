@@ -340,9 +340,13 @@ class VesselBranchWizard(object):
         self.onStopInteraction()
         nodeList = self._node.GetNodeLabelList()
         nodeId = treeItem.nodeId
-        self._tree.removeNode(nodeId)
-        self._node.RemoveNthControlPoint(nodeList.index(nodeId))
-        self.updateNodeVisibility()
+        remove_worked = self._tree.removeNode(nodeId)
+
+        # Delete node in the scene if it has been place
+        if remove_worked and nodeId in nodeList:
+            self._node.RemoveNthControlPoint(nodeList.index(nodeId))
+            self.updateNodeVisibility()
+
         if self._currentTreeItem == treeItem:
             self._currentTreeItem = None
         self._updatePlacingFinished()
