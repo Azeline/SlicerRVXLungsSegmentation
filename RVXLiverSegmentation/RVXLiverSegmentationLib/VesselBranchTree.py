@@ -34,7 +34,6 @@ class VesselBranchTreeItem(qt.QTreeWidgetItem):
 
     suffix = suffixMap.get(self._status, None)
     self.setText(0, "{} {}".format(self.nodeId, suffix) if suffix is not None else self.nodeId)
-    self.setText(VesselTreeColumnRole.INSERT_BEFORE, "Insert Before")
 
 class VesselBranchTree(qt.QTreeWidget):
   """Tree representation of vessel branch nodes.
@@ -61,7 +60,7 @@ class VesselBranchTree(qt.QTreeWidget):
     self._vesselHelpWidget = vesselHelpWidget
 
     # Configure tree widget
-    self.setColumnCount(3)
+    self.setColumnCount(2)
     self.setHeaderLabels(["Branch Node Name", "", ""])
 
     # Configure tree to have first section stretched and last sections to be at right of the layout
@@ -216,13 +215,13 @@ class VesselBranchTree(qt.QTreeWidget):
     else:
       return VesselBranchTreeItem(nodeId)
 
-  def _addNode(self, parent_node=None):
+  def _addNode(self, parent_node=False):
     new_node_idx = len(self._branchDict)
     new_node = f"n{new_node_idx}"
     while self.isInTree(new_node):
       new_node_idx += 1
       new_node = f"n{new_node_idx}"
-    if parent_node is None:
+    if parent_node is False:
       if len(self._branchDict) == 1:
         parent_node = list(self.getNodeList())[0]
       elif len(self._branchDict) > 1:
