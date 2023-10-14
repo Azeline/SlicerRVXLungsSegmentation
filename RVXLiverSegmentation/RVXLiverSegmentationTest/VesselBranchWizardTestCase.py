@@ -222,48 +222,6 @@ class VesselBranchWizardTestCase(unittest.TestCase):
     self.nodePlace.placeNode()
     self.assertTrue(self.markupNode.GetLocked())
 
-  def test_placing_node_before_does_nothing_if_current_node_is_root(self):
-    self.click_first_element()
-    self.nodePlace.placeNode()
-    self.click_first_element()
-
-    self.wizard.onInsertBeforeNode()
-    self.assertEqual(InteractionStatus.STOPPED, self.wizard.getInteractionStatus())
-
-  def test_placing_node_before_does_nothing_if_current_node_is_not_placed(self):
-    self.click_first_element()
-    self.nodePlace.placeNode()
-    self.click_second_element()
-
-    self.wizard.onInsertBeforeNode()
-    self.assertEqual(InteractionStatus.STOPPED, self.wizard.getInteractionStatus())
-
-  def test_placing_node_before_does_nothing_if_parent_node_is_not_placed(self):
-    self.click_second_element()
-    self.nodePlace.placeNode()
-    self.click_second_element()
-
-    self.wizard.onInsertBeforeNode()
-    self.assertEqual(InteractionStatus.STOPPED, self.wizard.getInteractionStatus())
-
-  def test_when_placing_node_inserts_node_name_of_next_node_when_placed(self):
-    # Place first and second nodes
-    self.click_first_element()
-    self.nodePlace.placeNode()
-    self.nodePlace.placeNode()
-
-    # Select second node and insert two nodes before
-    self.click_second_element()
-    self.wizard.onInsertBeforeNode()
-    self.assertEqual(InteractionStatus.INSERT_BEFORE, self.wizard.getInteractionStatus())
-    self.assertTrue(self.nodePlace.placeModeEnabled)
-
-    self.nodePlace.placeNode()
-    self.nodePlace.placeNode()
-
-    # Expect second node id to be present 3 times in tree
-    self.assertNTimesInTree(VeinId.rightPortalVein, 3)
-
   def assertNTimesInTree(self, veinId, ntimes):
     nodeIds = filter(lambda x: veinId in x, self.tree.getNodeList())
     self.assertEqual(ntimes, len(list(nodeIds)))

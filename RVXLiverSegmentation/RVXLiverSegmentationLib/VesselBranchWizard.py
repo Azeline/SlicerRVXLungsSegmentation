@@ -71,7 +71,6 @@ class NodeBranches(object):
 
 class InteractionStatus(object):
     STOPPED = "Stopped"
-    INSERT_BEFORE = "Insert Before Node"
     EDIT = "Edit"
     PLACING = "Placing"
 
@@ -218,18 +217,6 @@ class VesselBranchWizard(object):
     def getInteractionStatus(self):
         return self._interactionStatus
 
-    def onInsertBeforeNode(self):
-        """
-    If current node and parent node are placed, enables node placing and set node as insert before
-    """
-        self.onStopInteraction()
-        insertEnabled = self._isCurrentNodePlaced() and self._isParentNodePlaced()
-        if insertEnabled and self._isCurrentNodePlaced() and self._isParentNodePlaced():
-            self._placeWidget.setPlaceModeEnabled(True)
-            self._currentTreeItem.status = PlaceStatus.INSERT_BEFORE
-            self._updateCurrentInteraction(InteractionStatus.INSERT_BEFORE)
-            self._tree.setItemSelected(self._currentTreeItem)
-
     def _isCurrentNodePlaced(self):
         return self._currentItemPlaceStatus() == PlaceStatus.PLACED
 
@@ -264,8 +251,6 @@ class VesselBranchWizard(object):
     def _deactivatePreviousItem(self):
         if self._currentItemPlaceStatus() == PlaceStatus.PLACING:
             self._currentTreeItem.status = PlaceStatus.NOT_PLACED
-        elif self._currentItemPlaceStatus() == PlaceStatus.INSERT_BEFORE:
-            self._currentTreeItem.status = PlaceStatus.PLACED
 
     def onItemClicked(self, treeItem, column):
         """
@@ -277,8 +262,6 @@ class VesselBranchWizard(object):
         self._currentTreeItem = treeItem
         if column == VesselTreeColumnRole.DELETE:
             self._onDeleteItem(treeItem)
-        elif column == VesselTreeColumnRole.INSERT_BEFORE:
-            self.onInsertBeforeNode()
         elif treeItem.status == PlaceStatus.NOT_PLACED:
             self.onStartPlacing()
         elif self._interactionStatus == InteractionStatus.PLACING and treeItem.status == PlaceStatus.PLACED:
@@ -369,8 +352,6 @@ class VesselBranchWizard(object):
 
             if self._interactionStatus == InteractionStatus.PLACING:
                 self._placeCurrentNodeAndActivateNext()
-            elif self._interactionStatus == InteractionStatus.INSERT_BEFORE:
-                self._insertPlacedNodeBeforeCurrent()
 
         self._treeDrawer.updateTreeLines()
         self._updatePlacingFinished()
@@ -389,14 +370,6 @@ class VesselBranchWizard(object):
 
     def _renamePlacedNode(self, name):
         self._node.SetNthControlPointLabel(self._node.GetLastFiducialId(), name)
-
-    def _insertPlacedNodeBeforeCurrent(self):
-        insertedId = self._nextInsertedNodeId(self._currentTreeItem.nodeId)
-        self._renamePlacedNode(insertedId)
-        self._tree.insertBeforeNode(nodeId=insertedId, beforeNodeId=self._currentTreeItem.nodeId,
-                                    status=PlaceStatus.PLACED)
-        self._currentTreeItem = self._tree.getTreeWidgetItem(insertedId)
-        self.onInsertBeforeNode()
 
     @staticmethod
     def _nextInsertedNodeId(nodeId):
@@ -470,11 +443,9 @@ class PlaceStatus(object):
     NOT_PLACED = 0
     PLACING = 1
     PLACED = 2
-    INSERT_BEFORE = 3
     NONE = 4
 
 
 class VesselTreeColumnRole(object):
     NODE_ID = 0
-    INSERT_BEFORE = 1
     DELETE = 2

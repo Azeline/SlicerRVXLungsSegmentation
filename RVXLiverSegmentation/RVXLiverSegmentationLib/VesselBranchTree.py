@@ -29,8 +29,7 @@ class VesselBranchTreeItem(qt.QTreeWidgetItem):
     self.updateText()
 
   def updateText(self):
-    suffixMap = {PlaceStatus.NOT_PLACED: "<click here to start placing node>", PlaceStatus.PLACING: "*placing*",
-                 PlaceStatus.INSERT_BEFORE: "*inserting before*"}
+    suffixMap = {PlaceStatus.NOT_PLACED: "<click here to start placing node>", PlaceStatus.PLACING: "*placing*"}
 
     suffix = suffixMap.get(self._status, None)
     self.setText(0, "{} {}".format(self.nodeId, suffix) if suffix is not None else self.nodeId)
@@ -53,8 +52,6 @@ class VesselBranchTree(qt.QTreeWidget):
     self.itemRenamed = Signal(str, str)
     self.itemDropped = Signal()
     self.itemDeleted = Signal("VesselBranchTreeItem")
-
-    self.insertBeforeClicked = Signal("VesselBranchTreeItem")
 
     self._branchDict = {}
     self._vesselHelpWidget = vesselHelpWidget
@@ -284,34 +281,6 @@ class VesselBranchTree(qt.QTreeWidget):
     node.setToolTip(0, self._vesselHelpWidget.tooltipImageUrl(nodeId))
     self.expandAll()
 
-  def insertBeforeNode(self, nodeId, beforeNodeId, status=PlaceStatus.NOT_PLACED):
-    """Insert given node before the input parent Id. Inserts new node as root if childNodeId is None.
-
-    Parameters
-    ----------
-    nodeId: str
-      Unique ID of the node to insert in the tree
-    beforeNodeId: str or None
-      Unique ID of the node before which the new node will be inserted. If None or "" will insert node at root.
-    status: Union[PlaceStatus, int]
-
-    Raises
-    ------
-      ValueError
-        If childNodeId is not None and doesn't exist in the tree
-    """
-    if not beforeNodeId:
-      self._insertNode(nodeId, None, status)
-    else:
-      parentNodeId = self.getParentNodeId(beforeNodeId)
-      childItem = self._takeItem(beforeNodeId)
-
-      self._insertNode(nodeId, parentNodeId, status)
-      nodeItem = self._insertNode(nodeId, parentNodeId, status)
-      nodeItem.addChild(childItem)
-
-    self.expandAll()
-
   def removeNode(self, nodeId):
     """Remove given node from tree.
 
@@ -332,27 +301,6 @@ class VesselBranchTree(qt.QTreeWidget):
       return False
     else:
       self._removeIntermediateItem(nodeItem, nodeId)
-      return True
-
-  def _removeRootItem(self, nodeItem, nodeId):
-    """Only remove if it has exactly one direct child and replace root by child. Else does nothing.
-
-    Returns
-    -------
-    bool - True if root item was removed, False otherwise
-    """
-    if nodeItem.childCount() > 1:
-      return False
-    else:
-      # Delete root item
-      self.takeTopLevelItem(0)
-      del self._branchDict[nodeId]
-
-      # Set child as new root item if necessary
-      if nodeItem.childCount() == 1:
-        child = nodeItem.takeChild(0)
-        self.insertTopLevelItem(0, child)
-        child.setExpanded(True)
       return True
 
   def _removeIntermediateItem(self, nodeItem, nodeId):
