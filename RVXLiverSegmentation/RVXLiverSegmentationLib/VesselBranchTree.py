@@ -329,7 +329,7 @@ class VesselBranchTree(qt.QTreeWidget):
     """
     nodeItem = self._branchDict[nodeId]
     if nodeItem.parent() is None:
-      return self._removeRootItem(nodeItem, nodeId)
+      return False
     else:
       self._removeIntermediateItem(nodeItem, nodeId)
       return True
