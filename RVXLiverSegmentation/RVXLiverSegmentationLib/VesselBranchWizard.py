@@ -243,6 +243,9 @@ class VesselBranchWizard(object):
             self._updateCurrentInteraction(InteractionStatus.PLACING)
 
     def onStopInteraction(self):
+        self._tree.editing_node = False
+        if self._currentTreeItem is not None:
+            self._currentTreeItem.updateText()
         self._deactivatePreviousItem()
         self._placeWidget.setPlaceModeEnabled(False)
         self._node.SetLocked(True)
@@ -272,12 +275,10 @@ class VesselBranchWizard(object):
 
     def onItemRenamed(self, previous, new):
         nodeList = self._node.GetNodeLabelList()
-        try:
+        if previous in nodeList:
             idx = nodeList.index(previous)
             self._node.SetNthControlPointLabel(idx, new)
             self._treeDrawer.updateTreeLines()
-        except ValueError:
-            pass
 
     def _jumpSlicesToCurrentNode(self):
         """

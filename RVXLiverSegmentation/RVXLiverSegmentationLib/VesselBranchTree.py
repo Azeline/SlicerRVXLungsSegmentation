@@ -185,7 +185,7 @@ class VesselBranchTree(qt.QTreeWidget):
         return
 
       self._branchDict[item.text(0)] = self._branchDict.pop(item.nodeId)
-      item.nodeId = item.text(0)
+      item.nodeId = new
       item.updateText()
       self.itemRenamed.emit(previous, new)
 
