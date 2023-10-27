@@ -10,9 +10,9 @@ from .RVXLiverSegmentationUtils import Icons, getMarkupIdPositionDictionary, cre
 class VesselBranchTreeItem(qt.QTreeWidgetItem):
   """Helper class holding nodeId and nodeName in the VesselBranchTree
   """
-
   def __init__(self, nodeId, status=PlaceStatus.NOT_PLACED):
     qt.QTreeWidgetItem.__init__(self)
+    self.lastaction = ""
     self.nodeId = nodeId
     self.setIcon(VesselTreeColumnRole.DELETE, Icons.delete)
     self._status = status
@@ -53,7 +53,6 @@ class VesselBranchTree(qt.QTreeWidget):
     self.itemRenamed = Signal(str, str)
     self.itemDropped = Signal()
     self.itemDeleted = Signal("VesselBranchTreeItem")
-
     self.insertBeforeClicked = Signal("VesselBranchTreeItem")
 
     self._branchDict = {}
@@ -82,6 +81,7 @@ class VesselBranchTree(qt.QTreeWidget):
 
   def clear(self):
     self._branchDict = {}
+    self.lastaction = "clear"
     qt.QTreeWidget.clear(self)
 
   def clickItem(self, item):
@@ -168,11 +168,15 @@ class VesselBranchTree(qt.QTreeWidget):
     addChildAction = qt.QAction("Add child")
     addChildAction.triggered.connect(lambda: self._addNode(parent_node=self.currentItem().nodeId))
 
+    undoChildAction = qt.QAction("Undo child")
+    undoChildAction.triggered.connect(lambda: self._undoNode(parent_node=self.currentItem().nodeId))
+
     menu = qt.QMenu(self)
     menu.addAction(displayAction)
     menu.addAction(renameAction)
     menu.addAction(deleteAction)
     menu.addAction(addChildAction)
+    menu.addAction(undoChildAction)
 
     menu.exec_(self.mapToGlobal(position))
 
@@ -200,8 +204,10 @@ class VesselBranchTree(qt.QTreeWidget):
 
   def renameItem(self):
     item: VesselBranchTreeItem = self.currentItem()
+    item.previous_name = item.text(0)
     self.editing_node = True
     self.editItem(item, 0)
+    self.lastaction = "rename"
 
   def _takeItem(self, nodeId):
     """Remove item with given item id from the tree. Removes it from its parent if necessary
@@ -215,6 +221,31 @@ class VesselBranchTree(qt.QTreeWidget):
     else:
       return VesselBranchTreeItem(nodeId)
 
+  def _undoNode(self, parent_node=False):
+    """Undo last node added to the tree
+    """
+    if len(self._branchDict) == 0:
+      return
+    last_node = list(self.getNodeList())[-1]
+    if self.lastaction == "add":
+      self._removeFromParent(self._branchDict[last_node])
+      self.itemDeleted.emit(last_node)
+      self.lastaction = ""
+    elif self.lastaction == "delete":
+      self._insertNode(self.removedNode.nodeId, self.removedNodeParent.nodeId, self.removedNode.status)
+      self.lastaction = ""
+    elif self.lastaction == "clear":
+      self._addNode(parent_node=self.currentItem().nodeId)
+      self.lastaction = ""
+    elif self.lastaction == "rename":
+      item: VesselBranchTreeItem = self.currentItem()
+      item.setText(0, item.previous_name)
+      self.editing_node = True
+      self.itemRenamed.emit(item.nodeId, item.text(0))
+      self.editItem(item, 0)
+      self.lastaction = ""
+    slicer.mrmlScene.Undo()
+
   def _addNode(self, parent_node=False):
     new_node_idx = len(self._branchDict)
     new_node = f"n{new_node_idx}"
@@ -227,6 +258,8 @@ class VesselBranchTree(qt.QTreeWidget):
       elif len(self._branchDict) > 1:
         parent_node = self.getTreeParentList()[-1][0]
     self._insertNode(new_node, parent_node, PlaceStatus.NOT_PLACED)
+    self.lastaction = "add"
+
 
   def _removeFromParent(self, nodeItem):
     """Remove input node item from its parent if it is attached to an item or from the TreeWidget if at the root
@@ -327,7 +360,10 @@ class VesselBranchTree(qt.QTreeWidget):
     -------
     bool - True if node was removed, False otherwise
     """
+    self.lastaction = "delete"
     nodeItem = self._branchDict[nodeId]
+    self.removedNode = nodeItem
+    self.removedNodeParent = nodeItem.parent()
     if nodeItem.parent() is None:
       return self._removeRootItem(nodeItem, nodeId)
     else:
@@ -701,6 +737,7 @@ class TreeDrawer(object):
 
   def clear(self):
     removeNodeFromMRMLScene(self._lineModel)
+    self.lastaction = "clear"
     self._setupLineModel()
 
 
@@ -844,6 +881,8 @@ class VesselBranchWidget(qt.QWidget):
     """
     qt.QWidget.__init__(self, parent)
 
+    slicer.mrmlScene.SetUndoOn()
+
     # Create Markups node
     self._createVesselsBranchMarkupNode()
 
@@ -924,6 +963,8 @@ class VesselBranchWidget(qt.QWidget):
     buttonLayout.addLayout(addEditButtonLayout)
     self._clearTreeButton = createButton("Clear Tree", lambda : (self._branchTree.clear(), self._treeDrawer.clear(), self._markupNode.RemoveAllControlPoints()))
     buttonLayout.addWidget(self._clearTreeButton)
+    self.undoNodeButton = createButton("Undo Node", self._branchTree._undoNode)
+    buttonLayout.addWidget(self.undoNodeButton)
     self._addNodeButton = createButton("Add Node", self._branchTree._addNode)
     buttonLayout.addWidget(self._addNodeButton)
     self.extractVesselsButton = createButton("Extract Vessels from node tree")

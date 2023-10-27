@@ -337,6 +337,7 @@ class VesselBranchWizard(object):
         """
     Remove the item from the tree and hide the associated markup
     """
+        
         self.onStopInteraction()
         nodeList = self._node.GetNodeLabelList()
         nodeId = treeItem.nodeId
