@@ -21,6 +21,7 @@ include(${Slicer_USE_FILE})
 # Extension modules
 add_subdirectory(RVXLiverSegmentation)
 add_subdirectory(RVXLiverSegmentationEffect)
+add_subdirectory(RVX)
 ## NEXT_MODULE
 
 #-----------------------------------------------------------------------------

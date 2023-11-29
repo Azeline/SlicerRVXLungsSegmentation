@@ -177,6 +177,9 @@ class VesselBranchWizard(object):
                            lambda current, previous: self.onItemClicked(current, 0))
         self._tree.itemRenamed.connect(self.onItemRenamed)
         self._tree.itemDeleted.connect(self._onDeleteItem)
+        self._tree.sceneItemDeleted.connect(self._onDeleteSceneItem)
+        self._tree.itemReplaced.connect(self._onReplaceItem)
+        self._tree.itemRedraw.connect(self._onRedraw)
         self._tree.keyPressed.connect(self.onKeyPressed)
         self._tree.itemDropped.connect(lambda: self._treeDrawer.updateTreeLines())
         self._node.pointAdded.connect(self.onMarkupPointAdded)
@@ -272,8 +275,9 @@ class VesselBranchWizard(object):
     On item clicked, start placing item if necessary.
     Delete item if delete column was selected
     """
+        self._tree.lastaction = "place"
+        self._tree.removedNode = treeItem
         self._deactivatePreviousItem()
-
         self._currentTreeItem = treeItem
         if column == VesselTreeColumnRole.DELETE:
             self._onDeleteItem(treeItem)
@@ -333,11 +337,27 @@ class VesselBranchWizard(object):
         if key == qt.Qt.Key_Delete:
             self._onDeleteItem(treeItem)
 
+    def _onDeleteSceneItem(self, treeItem):
+        """
+    Remove the item from the scene only and set the node to unplaced
+    """
+        self.onStopInteraction()
+        nodeList = self._node.GetNodeLabelList()
+        nodeId = treeItem.nodeId
+
+        # Delete node in the scene if it has been place
+        if nodeId in nodeList:
+            self._node.RemoveNthControlPoint(nodeList.index(nodeId))
+            self.updateNodeVisibility()
+
+        treeItem.status = PlaceStatus.NOT_PLACED
+        self._placeWidget.setPlaceModeEnabled(False)
+        self._updateCurrentInteraction(InteractionStatus.NOT_PLACED)
+
     def _onDeleteItem(self, treeItem):
         """
     Remove the item from the tree and hide the associated markup
     """
-        
         self.onStopInteraction()
         nodeList = self._node.GetNodeLabelList()
         nodeId = treeItem.nodeId
@@ -345,12 +365,34 @@ class VesselBranchWizard(object):
 
         # Delete node in the scene if it has been place
         if remove_worked and nodeId in nodeList:
+            self.lastnode = nodeList.index(nodeId)
             self._node.RemoveNthControlPoint(nodeList.index(nodeId))
             self.updateNodeVisibility()
 
         if self._currentTreeItem == treeItem:
             self._currentTreeItem = None
         self._updatePlacingFinished()
+
+
+    def _onRedraw(self, treeItem):
+        self._treeDrawer.updateTreeLines()
+
+    def _onReplaceItem(self, treeItem):
+        """
+    Replace the deleted item back in the scene
+    """
+        if self._isNodeItemPlaced(treeItem):
+            # Replace the node back in the scene
+            # You might need to customize this part based on your application logic
+            # For now, let's assume you have a method to add a new node at a specific position
+            new_node_position = [0, 0, 0]  # Replace with the desired position
+            new_node_id = self.lastnode.nodeId
+            self._node.AddControlPointWorld(new_node_position, new_node_id)
+
+            self._treeDrawer.updateTreeLines()
+            self.updateNodeVisibility()
+            self._emitNewNodeId()
+
 
     def updateNodeVisibility(self):
         """

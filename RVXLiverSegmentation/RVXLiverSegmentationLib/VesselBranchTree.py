@@ -1,6 +1,7 @@
 import qt
 import slicer
 import vtk
+import copy
 
 from RVXLiverSegmentationLib import Signal, PlaceStatus, VesselBranchWizard, removeNodeFromMRMLScene, InteractionStatus, \
   VesselTreeColumnRole, VesselHelpWidget
@@ -52,7 +53,10 @@ class VesselBranchTree(qt.QTreeWidget):
     self.itemChanged.connect(self.onItemChange)
     self.itemRenamed = Signal(str, str)
     self.itemDropped = Signal()
+    self.itemRedraw = Signal("VesselBranchTreeItem")
+    self.itemReplaced = Signal("VesselBranchTreeItem")
     self.itemDeleted = Signal("VesselBranchTreeItem")
+    self.sceneItemDeleted = Signal("VesselBranchTreeItem")
     self.insertBeforeClicked = Signal("VesselBranchTreeItem")
 
     self._branchDict = {}
@@ -135,9 +139,12 @@ class VesselBranchTree(qt.QTreeWidget):
   def dropEvent(self, event):
     """On drop event, enforce structure of the tree is not broken.
     """
+    self.previousState = self.getTreeParentList()
     qt.QTreeWidget.dropEvent(self, event)
     self.enforceOneRoot()
     self.itemDropped.emit()
+    self.lastaction = "drop"
+
 
   def keyPressEvent(self, event):
     """Overridden from qt.QTreeWidget to notify listeners of key event
@@ -233,9 +240,14 @@ class VesselBranchTree(qt.QTreeWidget):
       self.lastaction = ""
     elif self.lastaction == "delete":
       self._insertNode(self.removedNode.nodeId, self.removedNodeParent.nodeId, self.removedNode.status)
+      self.itemReplaced.emit(self)
       self.lastaction = ""
-    elif self.lastaction == "clear":
-      self._addNode(parent_node=self.currentItem().nodeId)
+    elif self.lastaction == "drop":
+      self.replaceTree(self.previousState)
+      self.itemRedraw.emit(self)
+      self.lastaction = ""
+    elif self.lastaction == "place":
+      self.sceneItemDeleted.emit(self.removedNode)
       self.lastaction = ""
     elif self.lastaction == "rename":
       item: VesselBranchTreeItem = self.currentItem()
@@ -269,6 +281,12 @@ class VesselBranchTree(qt.QTreeWidget):
       parent.removeChild(nodeItem)
     else:
       self.takeTopLevelItem(self.indexOfTopLevelItem(nodeItem))
+  
+  def replaceTree(self, tree):
+    """Replace current tree by input tree. By reconstructing from scratch the new tree by using only insertnode from the getparentlist"""
+    self.clear()
+    for node in tree:
+      self._insertNode(node[1], node[0], node[2])
 
   def _insertNode(self, nodeId, parentId, status):
     """Insert the nodeId with input node name as child of the item whose name is parentId. If parentId is None, the item
@@ -504,9 +522,9 @@ class VesselBranchTree(qt.QTreeWidget):
     List[List[str]] Representing adjacent list of the tree. List is empty if tree is emtpy.
     """
     roots = [self.topLevelItem(i) for i in range(self.topLevelItemCount)]
-    treeParentList = [[None, root.nodeId] for root in roots]
+    treeParentList = [[None, root.nodeId, self.getTreeWidgetItem(root.nodeId).status] for root in roots]
     for root in roots:
-      treeParentList += self._getChildrenAdjacentLists(root)
+        treeParentList += self._getChildrenAdjacentLists(root)
 
     return treeParentList
 
@@ -555,12 +573,12 @@ class VesselBranchTree(qt.QTreeWidget):
     Returns
     -------
     List[List[str]]
-      List of every [parentId, childId] pair starting from nodeItem in the tree.
+      List of evesry [parentId, childId, status] pair starting from nodeItem in the tree.
     """
     children = [nodeItem.child(i) for i in range(nodeItem.childCount())]
-    nodeList = [[nodeItem.nodeId, child.nodeId] for child in children]
+    nodeList = [[nodeItem.nodeId, child.nodeId, self.getTreeWidgetItem(child.nodeId).status] for child in children]
     for child in children:
-      nodeList += self._getChildrenAdjacentLists(child)
+        nodeList += self._getChildrenAdjacentLists(child)
     return nodeList
 
   def enforceOneRoot(self):
