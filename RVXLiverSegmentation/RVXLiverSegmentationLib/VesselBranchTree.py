@@ -84,8 +84,9 @@ class VesselBranchTree(qt.QTreeWidget):
     event.ignore()
 
   def clear(self):
-    self._branchDict = {}
+    self.previousState = self.getTreeParentList()
     self.lastaction = "clear"
+    self._branchDict = {}
     qt.QTreeWidget.clear(self)
 
   def clickItem(self, item):
@@ -239,8 +240,10 @@ class VesselBranchTree(qt.QTreeWidget):
       self.itemDeleted.emit(last_node)
       self.lastaction = ""
     elif self.lastaction == "delete":
-      self._insertNode(self.removedNode.nodeId, self.removedNodeParent.nodeId, self.removedNode.status)
-      self.itemReplaced.emit(self)
+      self.setItemSelected(self.removedNode)
+      self.itemClicked.emit(self.removedNode, 0)
+      self._insertNode(self.removedNode.nodeId, self.removedNodeParent.nodeId, PlaceStatus.NOT_PLACED)
+      self.itemRedraw.emit(self)
       self.lastaction = ""
     elif self.lastaction == "drop":
       self.replaceTree(self.previousState)
@@ -249,12 +252,17 @@ class VesselBranchTree(qt.QTreeWidget):
     elif self.lastaction == "place":
       self.sceneItemDeleted.emit(self.removedNode)
       self.lastaction = ""
+    elif self.lastaction == "clear":
+      self.replaceTree(self.previousState)
+      self.itemRedraw.emit(self)
+      self.lastaction = ""
     elif self.lastaction == "rename":
       item: VesselBranchTreeItem = self.currentItem()
       item.setText(0, item.previous_name)
       self.editing_node = True
       self.itemRenamed.emit(item.nodeId, item.text(0))
       self.editItem(item, 0)
+      self.itemRedraw.emit(self)
       self.lastaction = ""
     slicer.mrmlScene.Undo()
 
@@ -755,7 +763,6 @@ class TreeDrawer(object):
 
   def clear(self):
     removeNodeFromMRMLScene(self._lineModel)
-    self.lastaction = "clear"
     self._setupLineModel()
 
 

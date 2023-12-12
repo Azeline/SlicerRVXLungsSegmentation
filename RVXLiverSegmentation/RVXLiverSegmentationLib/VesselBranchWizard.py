@@ -377,21 +377,10 @@ class VesselBranchWizard(object):
     def _onRedraw(self, treeItem):
         self._treeDrawer.updateTreeLines()
 
-    def _onReplaceItem(self, treeItem):
+    def _onReplaceItem(self, treeItem, column):
         """
     Replace the deleted item back in the scene
     """
-        if self._isNodeItemPlaced(treeItem):
-            # Replace the node back in the scene
-            # You might need to customize this part based on your application logic
-            # For now, let's assume you have a method to add a new node at a specific position
-            new_node_position = [0, 0, 0]  # Replace with the desired position
-            new_node_id = self.lastnode.nodeId
-            self._node.AddControlPointWorld(new_node_position, new_node_id)
-
-            self._treeDrawer.updateTreeLines()
-            self.updateNodeVisibility()
-            self._emitNewNodeId()
 
 
     def updateNodeVisibility(self):
